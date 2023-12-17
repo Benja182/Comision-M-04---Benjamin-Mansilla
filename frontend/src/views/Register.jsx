@@ -31,7 +31,7 @@ const Register = () => {
       event.preventDefault();
 
       try {
-        await api.post("/register", formData).then((res) => res.token);
+        await api.post("/users/register", formData).then((res) => res.token);
         navigate("/");
       } catch (error) {
         console.error("Error creating post:", error);
@@ -100,7 +100,7 @@ const Register = () => {
           </Form.Group>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Button variant="primary" type="submit">
-              Submit
+              Enviar
             </Button>
           </div>
         </Form>

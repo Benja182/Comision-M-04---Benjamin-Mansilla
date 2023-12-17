@@ -39,7 +39,7 @@ const PostList = () => {
             >
               {" "}
               {/* Agrega la clase "btn-animate" aquí */}
-              View Details
+              Ver detalles
             </Button>
           </Card.Body>
         </Card>

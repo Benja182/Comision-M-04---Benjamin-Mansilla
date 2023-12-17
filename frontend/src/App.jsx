@@ -8,23 +8,25 @@ import Login from "./views/Login";
 import Register from "./views/Register";
 import Home from "./views/Home";
 import Posts from "./views/Posts";
+import AuthProvider from "./components/AuthProvider";
 
 const App = () => {
   return (
     <Router>
-      <div>
+      <AuthProvider>
         <Header />
         <Routes>
           {/* ... Otras rutas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/crear-post" element={<CreatePost />} />
+          <Route path="/editar-post/:postId" element={<CreatePost />} />
           <Route path="/mis-posts" element={<Posts />} />
           <Route path="/post/:postId" element={<PostComment />} />
           <Route path="/" element={<Home />} />
           <Route element={<NotFound />} />
         </Routes>
-      </div>
+      </AuthProvider>
     </Router>
   );
 };

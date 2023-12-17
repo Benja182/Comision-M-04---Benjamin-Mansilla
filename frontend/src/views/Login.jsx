@@ -1,10 +1,11 @@
 // Login.js
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { AuthContext } from "../hooks/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const Login = () => {
     username: "",
     password: "",
   });
-
+  const { onChangeAuthStatus } = useContext(AuthContext);
   const onChange = useCallback(
     (event) => {
       setFormData({
@@ -28,13 +29,15 @@ const Login = () => {
       event.preventDefault();
 
       try {
-        await api.post("/login", formData).then((res) => res.token);
+        await api
+          .post("/users/login", formData)
+          .then((res) => onChangeAuthStatus(res.data));
         navigate("/");
       } catch (error) {
         console.error("Error creating post:", error);
       }
     },
-    [formData, navigate]
+    [formData, navigate, onChangeAuthStatus]
   );
 
   const onRegister = useCallback(() => {
@@ -80,7 +83,7 @@ const Login = () => {
               registrarse
             </Button>
             <Button variant="primary" type="submit">
-              Submit
+              Entrar
             </Button>
           </div>
         </Form>

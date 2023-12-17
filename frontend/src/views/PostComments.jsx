@@ -1,36 +1,73 @@
 // Home.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
-
-const formatCreatedAt = (createAt) => {
-  const date = new Date(createAt);
-
-  return date.getDay() + " " + date.getMonth() + " " + date.getFullYear();
-};
+import { Button } from "react-bootstrap";
+import { formatCreatedAt } from "./Home";
+import { AuthContext } from "../hooks/AuthContext";
 
 const PostComment = () => {
   const [post, setPost] = useState({});
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]);
+  const [comment, setComment] = useState({
+    description: "",
+  });
+  const [refresh, setRefresh] = useState(false);
+  const { token, user } = useContext(AuthContext);
   const params = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPost = async () => {
       const id = params.postId;
-      const result = await api.get("/post/" + id);
+      const result = await api.get("/posts/" + id);
 
-      if (result.data) {
+      if (result.data.post) {
         setPost(result.data.post);
       }
+      setRefresh(false);
     };
 
     fetchPost();
-  }, [params]);
+  }, [params, refresh]);
+
+  const onChange = useCallback(
+    (event) => {
+      setComment({
+        ...comment,
+        [event.target.name]: event.target.value,
+      });
+    },
+    [comment]
+  );
+
+  const onSubmit = useCallback(
+    async (event) => {
+      event.preventDefault();
+
+      try {
+        await api.post(
+          "/comments/" + post._id,
+          { ...comment, author: user },
+          {
+            headers: { authorization: token },
+          }
+        );
+        setComment({ description: "" });
+        setRefresh(true);
+      } catch (error) {
+        console.error("Error creating post:", error);
+      }
+    },
+    [comment, token, user, post]
+  );
+
+  const onLogin = useCallback(() => {
+    !token && navigate("/login");
+  }, [token, navigate]);
 
   return (
     <Container className="mt-4">
@@ -56,7 +93,8 @@ const PostComment = () => {
           >
             <h1>{post && post.title}</h1>
             <div>
-              {post && post.author} {formatCreatedAt(post && post.createAt)} ART
+              {post.author && post.author.fullname}{" "}
+              {formatCreatedAt(post && post.createdAt)} ART
             </div>
             <div>{post && post.description}</div>
           </div>
@@ -64,16 +102,28 @@ const PostComment = () => {
       </Row>
       <Row className="mt-4">
         <Col>
-          <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Comentarios</Form.Label>
-            <Form.Control type="text" placeholder="Agregar Comentario" />
-          </Form.Group>
-          {Array.from({ length: 10 }).map((_, index) => (
-            <div className="ms-4 mb-2">
-              <h6>pepito fuentes</h6>
-              <div>un comentario {index}</div>
-            </div>
-          ))}
+          <Form onSubmit={onSubmit}>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Comentarios</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Agregar Comentario"
+                onChange={onChange}
+                name="description"
+                value={comment.description}
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit" onClick={onLogin}>
+              {token ? "Publicar" : "Iniciar Sesion para comentar"}
+            </Button>
+          </Form>
+          {post.comments &&
+            post.comments.map((comment, index) => (
+              <div className="ms-4 mb-2" key={index}>
+                <h6>{comment.author.fullname}</h6>
+                <div>{comment.description}</div>
+              </div>
+            ))}
         </Col>
       </Row>
     </Container>

@@ -1,4 +1,7 @@
 /* styles.css */
+iframe {
+  pointer-events: none;
+}
 
 body {
     font-family: 'Arial', sans-serif;

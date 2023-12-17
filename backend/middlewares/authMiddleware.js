@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization');
+  const token = req.header("authorization");
 
   if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   try {
@@ -12,8 +12,8 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded.user;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({ error: 'Unauthorized' });
+    console.error("Auth middleware error:", error);
+    res.status(401).json({ error: "Unauthorized" });
   }
 };
 

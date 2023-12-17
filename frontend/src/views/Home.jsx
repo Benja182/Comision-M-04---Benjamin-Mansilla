@@ -7,8 +7,9 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import PostCard from "../components/PostDetail";
 
-const formatCreatedAt = (createAt) => {
+export const formatCreatedAt = (createAt) => {
   const date = new Date(createAt);
 
   return date.getDay() + " " + date.getMonth() + " " + date.getFullYear();
@@ -20,10 +21,13 @@ const Home = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const results = await api.get("/posts");
-      if (results.data) {
-        setPosts(results.data.posts);
-      }
+      try {
+        const results = await api.get("/posts");
+        if (results.data.posts) {
+          console.log(results.data.posts);
+          setPosts(results.data.posts || []);
+        }
+      } catch {}
     };
 
     fetchPosts();
@@ -48,21 +52,7 @@ const Home = () => {
       </Row>
       <Row xs={1} md={2} className="g-4">
         {posts.map((post, index) => (
-          <Col key={index}>
-            <Card>
-              <Card.Img variant="top" src={post.imageURL} />
-              <Card.Body>
-                <Card.Title>{post.title}</Card.Title>
-                <Card.Text>
-                  {post.author} {formatCreatedAt(post.createAt)} ART
-                </Card.Text>
-                <Card.Text>{post.description}</Card.Text>
-                <Button variant="primary" onClick={() => onVisitePost(post.id)}>
-                  Visitar
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
+          <PostCard post={post} onVisitePost={onVisitePost} index={index} />
         ))}
       </Row>
     </Container>
